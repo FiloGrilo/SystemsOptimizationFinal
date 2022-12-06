@@ -1,7 +1,7 @@
 # SystemsOptimizationFinal
 Final result of the group project for the course 02229 Systems Optimization
 
-To run the program, modify the variables "parent_dir", "testcases_path" and "test_file".
+To run the program, modify the initial variables "parent_dir", "testcases_path" and "test_file".
 
 The "parent_dir" should be the parent directory to the folder with the testcases folders. The folder with the execution logs will also be located here.
 
