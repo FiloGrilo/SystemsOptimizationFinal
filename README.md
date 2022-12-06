@@ -12,7 +12,9 @@ The "test_file" should be the name of the specific testcase file to be ran.
 As an example, to test the file with the following path "/Users/joaomena/Documents/testcases_seperation_tested/taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__15__tsk.csv", the variables should be set like this:
 
 > parent_dir = "/Users/joaomena/Documents/"
+
 > testcases_path = os.path.join(parent_dir, "testcases_seperation_tested")
+
 > test_file = "taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__15__tsk.csv"
 
 A virtual environment should be created using the command:
