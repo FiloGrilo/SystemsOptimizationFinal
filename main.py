@@ -9,7 +9,7 @@ import time
 # set file path for test cases
 parent_dir = "/Users/joaomena/Documents/"
 testcases_path = os.path.join(parent_dir, "testcases_seperation_tested")
-test_file = "taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__15__tsk.csv"
+test_file = "taskset__1643188013-a_0.1-b_0.1-n_30-m_20-d_unif-p_2000-q_4000-g_1000-t_5__0__tsk.csv"
 
 # set path to log file
 results_path = os.path.join(parent_dir, f"{test_file}_results")
@@ -105,19 +105,39 @@ def divisible_random(a, b, n):
     return result
 
 
-def pdc(t_list, tt_hyperperiod):
+def pdc(t_list, tt_hyperperiod, u, largest_deadline, deadline_list):
     """
     use processor demand criterion to determine if a set of tasks is schedulable or not
     :param t_list: array of tasks to consider
     :param tt_hyperperiod: hyperperiod from the tasks considered
+    :param u: processor usage
+    :param largest_deadline: largest deadline to consider
+    :param deadline_list:
     :return: 0 if schedulable, 1 if not schedulable
     """
-    s = 0
-    for task in t_list:
-        s += (tt_hyperperiod / task.period) * task.duration
 
-    if s > tt_hyperperiod:
+    if u > 1:
         return 1
+
+    l_sum = 0
+    for task in t_list:
+        l_sum += (task.period - task.deadline) * (task.duration / task.period)
+
+    limit = l_sum / (1 - u)  # L*
+
+    check_condition = min(tt_hyperperiod, max(largest_deadline, limit))
+
+    check_points = []  # D
+    for deadline in deadline_list:
+        if deadline <= check_condition:
+            check_points.append(deadline)
+
+    for t in check_points:
+        dbf = 0
+        for task in t_list:
+            dbf += ((t + task.period - task.deadline) / task.period) * task.duration
+        if dbf > t:
+            return 1
 
     return 0
 
@@ -137,12 +157,15 @@ def edf_sim(t_list, ps_array):
     U = 0
 
     # add tt tasks to array and fill arrays with parameters from all tasks
+    max_d = 0  # save largest deadline
     tt_list = []
     for task in t_list:
         if task.type == "TT":
             tt_list.append(task)
             C.append(task.duration)
             D.append(task.deadline)
+            if task.deadline > max_d:
+                max_d = task.deadline
             p.append(task.period)
             U = U + task.duration / task.period
 
@@ -151,6 +174,8 @@ def edf_sim(t_list, ps_array):
         tt_list.append(ps)
         C.append(ps.duration)
         D.append(ps.deadline)
+        if ps.deadline > max_d:
+            max_d = ps.deadline
         p.append(ps.period)
         U = U + ps.duration / ps.period
 
@@ -163,7 +188,7 @@ def edf_sim(t_list, ps_array):
     wcrt_changed = np.zeros(len(tt_list))
 
     # check if TT tasks are schedulable for EDF using processor demand criterion
-    tt_valid = pdc(tt_list, T)
+    tt_valid = pdc(tt_list, T, U, max_d, D)
     if tt_valid > 0:
         print("Task set not schedulable")
         return [], [], T
