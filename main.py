@@ -112,30 +112,35 @@ def pdc(t_list, tt_hyperperiod, u, largest_deadline, deadline_list):
     :param tt_hyperperiod: hyperperiod from the tasks considered
     :param u: processor usage
     :param largest_deadline: largest deadline to consider
-    :param deadline_list:
+    :param deadline_list: list of deadlines from tasks considered
     :return: 0 if schedulable, 1 if not schedulable
     """
 
+    # if processor usage is over 1, task set is not schedulable
     if u > 1:
         return 1
 
+    # compute denominator for L*
     l_sum = 0
     for task in t_list:
         l_sum += (task.period - task.deadline) * (task.duration / task.period)
+    # compute L*
+    limit = l_sum / (1 - u)
 
-    limit = l_sum / (1 - u)  # L*
-
+    # condition value to determine time check points
     check_condition = min(tt_hyperperiod, max(largest_deadline, limit))
 
-    check_points = []  # D
+    # determine list of time points that must be checked using check_condition
+    check_points = []
     for deadline in deadline_list:
         if deadline <= check_condition:
             check_points.append(deadline)
 
+    # use demand bound function for every time check point to determine if task set is schedulable or not
     for t in check_points:
         dbf = 0
         for task in t_list:
-            dbf += ((t + task.period - task.deadline) / task.period) * task.duration
+            dbf += ((t + task.period - task.deadline) / task.period) * task.duration # demand bound function
         if dbf > t:
             return 1
 
